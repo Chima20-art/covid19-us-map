@@ -8,21 +8,51 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [rawData, setRawData] = useState(null);
+  const [minData, setMinData] = useState(null);
+  const [maxData, setMaxData] = useState(null);
+  const [cases, setCases] = useState(null);
 
   useEffect(() => {
-    const data = [];
+    var data = [];
     usStates.forEach((item) => {
       data.push({
         name: item.abbreviation,
         cases: Math.floor(Math.random() * 6000),
+        fullName: item.name,
       });
     });
-    setRawData(data);
-    console.log(data);
-    setLoading(false);
 
+    //console.log(data[2].cases);
+    const cases = [];
+    data.forEach((item) => {
+      cases.push(item.cases);
+    });
+
+    var min = Math.min.apply(Math, cases);
+
+    console.log("minData is : " + min);
+    var max = Math.max.apply(Math, cases);
+
+    console.log("maxData is : " + max);
+
+    data = data.map((a) => {
+      var percentage = parseInt((a.cases * 100) / max);
+      var color = "hsl(0,100%," + (100 - percentage) + "%)";
+      return {
+        name: a.name,
+        cases: a.cases,
+        color: color,
+        fullName: a.fullName,
+      };
+    });
+
+    setMaxData(max);
+    setRawData(data);
+    setCases(cases);
+    setMinData(min);
+    setLoading(false);
     return () => {};
-  }, [loading]);
+  }, []);
 
   const mapHandler = (event) => {
     alert(event.target.dataset.name);
@@ -30,11 +60,11 @@ function App() {
 
   const statesCustomConfig = () => {
     var config = {};
-    usStates.forEach((item) => {
-      config[item.abbreviation] = {
-        fill: "black",
+    rawData.forEach((item) => {
+      config[item.name] = {
+        fill: item.color,
         clickHandler: (event) => {
-          alert(item.name);
+          alert(item.fullName + " has " + item.cases);
         },
       };
     });
